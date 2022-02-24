@@ -179,7 +179,7 @@ def michael():
 
     doneProjects = []
 
-    (contributers, projects) = parse("./input_data/d_dense_schedule.in.txt")
+    (contributers, projects) = parse("./input_data/f_find_great_mentors.in.txt")
     # print(contributers, projects)
 
     openProjects = projects.copy()
