@@ -179,7 +179,7 @@ def michael():
 
     doneProjects = []
 
-    (contributers, projects) = parse("./input_data/b_better_start_small.in.txt")
+    (contributers, projects) = parse("./input_data/d_dense_schedule.in.txt")
     # print(contributers, projects)
 
     openProjects = projects.copy()
@@ -211,6 +211,7 @@ def michael():
                 doneProjects.append(
                     {runningProjectName: runningProjectValues["contributers"]}
                 )
+                write_results(doneProjects)
                 projectToRemove.append(runningProjectName)
 
         for name in projectToRemove:
