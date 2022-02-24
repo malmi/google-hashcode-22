@@ -32,6 +32,31 @@ def nextProject(
     return [bestProject, reservedContribs]
 
 
+def nextProjectFastProjectStrategy(
+    projects,
+    currentDay,
+    contributors,
+):
+    bestProjectLength = 1000000000000000
+    bestProject = ""
+    reservedContribs = []
+    for name, project in projects.items():
+        # check if we can do project at all, skip if not
+        workingContribs = canBeDone(project, contributors)
+        if len(workingContribs) == 0:
+            # print(name, "can not be done")
+            continue
+        # calculate score
+        projectLength = project["len"]
+
+        if projectLength < bestProjectLength:
+            bestProject = name
+            bestProjectLength = projectLength
+            reservedContribs = workingContribs
+
+    return [bestProject, reservedContribs]
+
+
 def canBeDone(project, contributors):
     reservedContributors = {}
     for skillName, level in project["roles"].items():
@@ -148,8 +173,10 @@ def michael():
     openProjects = projects.copy()
     availableContributers = contributers.copy()
 
+    isFirstRun = True
+
     currentDay = 0
-    while (len(openProjects) > 0 or len(runningProjects) > 0) and currentDay < 100:
+    while len(openProjects) > 0 or len(runningProjects) > 0:
         # Is a project finished?
         projectToRemove = []
         for (runningProjectName, runningProjectValues) in runningProjects.items():
@@ -178,9 +205,13 @@ def michael():
             runningProjects.pop(name)
 
         # Find Project
-        (projectName, usedContributers) = nextProject(
-            openProjects, currentDay, availableContributers
-        )
+        if len(projectToRemove) > 0 or isFirstRun:
+            (projectName, usedContributers) = nextProjectFastProjectStrategy(
+                openProjects, currentDay, availableContributers
+            )
+            isFirstRun = False
+        else:
+            projectName = ""
 
         # No project to work on, we go to the next day
         if projectName is None or len(projectName) == 0:
