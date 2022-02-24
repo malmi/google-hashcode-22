@@ -58,21 +58,30 @@ def nextProjectFastProjectStrategy(
 
 
 def canBeDone(project, contributors):
+    isMentorable = False
+
     reservedContributors = {}
-    for skillName, level in project["roles"].items():
+    for skillName, levels in project["roles"].items():
+        if len(levels) > 1:
+            isMentorable = True
+
         found = False
-        for contribName, conributerSkills in contributors.items():
-            if (
-                skillName in conributerSkills
-                and conributerSkills[skillName] >= level
-                and not contribName in reservedContributors
-            ):
-                reservedContributors[contribName] = {
-                    "skills": conributerSkills,
-                    "used": skillName,
-                }
-                found = True
-                break
+        for level in levels:
+            for contribName, conributerSkills in contributors.items():
+                if (
+                    skillName in conributerSkills
+                    and conributerSkills[skillName] >= level
+                    and not contribName in reservedContributors
+                ):
+                    reservedContributors[contribName] = {
+                        "skills": conributerSkills,
+                        "used": skillName,
+                    }
+                    found = True
+                    break
+
+            if not found:
+                return {}
 
         if not found:
             return {}
@@ -116,7 +125,10 @@ def parse(filename):
                 (role, roleLevel) = lines[lineIndex].split()
                 lineIndex = lineIndex + 1
 
-                roles[role] = int(roleLevel)
+                if role in roles:
+                    roles[role].append(int(roleLevel))
+                else:
+                    roles[role] = [int(roleLevel)]
 
             projects[projectName] = {
                 "len": int(length),
@@ -167,7 +179,7 @@ def michael():
 
     doneProjects = []
 
-    (contributers, projects) = parse("./input_data/c_collaboration.in.txt")
+    (contributers, projects) = parse("./input_data/b_better_start_small.in.txt")
     # print(contributers, projects)
 
     openProjects = projects.copy()
@@ -206,7 +218,7 @@ def michael():
 
         # Find Project
         if len(projectToRemove) > 0 or isFirstRun:
-            (projectName, usedContributers) = nextProjectFastProjectStrategy(
+            (projectName, usedContributers) = nextProject(
                 openProjects, currentDay, availableContributers
             )
             isFirstRun = False
@@ -228,18 +240,6 @@ def michael():
             availableContributers.pop(contribName)
 
     write_results(doneProjects)
-
-    # newContributes = applyContributersToProject(contributers, bestProject)
-
-    # if newContributes is not empty:
-    #     # TODO: Remove project from projcts
-
-    #     nextBestProject = nextProject(projects, 0, newContributes)
-    # else:
-    #     # TODO: move days forword
-    #     pass
-
-    pass
 
 
 if __name__ == "__main__":
