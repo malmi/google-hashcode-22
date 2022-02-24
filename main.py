@@ -11,7 +11,7 @@ def nextProject(
     currentDay,
     contributors,
 ):
-    bestScore = 0
+    bestScore = -10000
     bestProject = ""
     reservedContribs = []
     for name, project in projects.items():
@@ -142,15 +142,16 @@ def michael():
 
     doneProjects = []
 
-    (contributers, projects) = parse("./input_data/a_an_example.in.txt")
+    (contributers, projects) = parse("./input_data/c_collaboration.in.txt")
     # print(contributers, projects)
 
     openProjects = projects.copy()
     availableContributers = contributers.copy()
 
     currentDay = 0
-    while len(openProjects) > 0 and currentDay < 100:
+    while (len(openProjects) > 0 or len(runningProjects) > 0) and currentDay < 100:
         # Is a project finished?
+        projectToRemove = []
         for (runningProjectName, runningProjectValues) in runningProjects.items():
             if currentDay == runningProjectValues["endDay"]:
                 # Level up
@@ -171,6 +172,10 @@ def michael():
                 doneProjects.append(
                     {runningProjectName: runningProjectValues["contributers"]}
                 )
+                projectToRemove.append(runningProjectName)
+
+        for name in projectToRemove:
+            runningProjects.pop(name)
 
         # Find Project
         (projectName, usedContributers) = nextProject(
@@ -185,20 +190,11 @@ def michael():
         # We start working on the project
         runningProjects[projectName] = {
             "contributers": usedContributers,
-            "endDay": openProjects[projectName]["len"],
+            "endDay": currentDay + openProjects[projectName]["len"],
         }
         openProjects.pop(projectName)
         for contribName in usedContributers.keys():
             availableContributers.pop(contribName)
-
-        print("ALL")
-        print(projects)
-
-        print("OPEN")
-        print(openProjects)
-
-        print("RUNNING")
-        print(runningProjects)
 
     write_results(doneProjects)
 
